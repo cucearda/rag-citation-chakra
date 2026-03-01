@@ -74,22 +74,27 @@ const floatingStyles = defineStyle({
   },
 });
 
+const firstProjectPath =
+  projects.length > 0 ? `/projects/${projects[0].id}` : "/";
+
 export default function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const { signInWithEmail, signInWithGoogle, loading, error } = useAuth();
   const navigate = useNavigate();
-
-  const firstProjectPath =
-    projects.length > 0 ? `/projects/${projects[0].id}` : "/";
+  const [activeProvider, setActiveProvider] = useState<"email" | "google" | null>(null);
 
   async function handleEmailLogin() {
+    setActiveProvider("email");
     const user = await signInWithEmail(email, password);
+    setActiveProvider(null);
     if (user) navigate(firstProjectPath);
   }
 
   async function handleGoogleLogin() {
+    setActiveProvider("google");
     const user = await signInWithGoogle();
+    setActiveProvider(null);
     if (user) navigate(firstProjectPath);
   }
 
@@ -131,8 +136,8 @@ export default function LoginForm() {
           colorPalette="teal"
           w="full"
           size="lg"
-          onClick={handleEmailLogin}
-          loading={loading}
+          onClick={() => void handleEmailLogin()}
+          loading={activeProvider === "email"}
           disabled={loading}
         >
           Sign In
@@ -152,8 +157,8 @@ export default function LoginForm() {
         w="full"
         size="lg"
         gap="3"
-        onClick={handleGoogleLogin}
-        loading={loading}
+        onClick={() => void handleGoogleLogin()}
+        loading={activeProvider === "google"}
         disabled={loading}
       >
         <FcGoogle size={20} />

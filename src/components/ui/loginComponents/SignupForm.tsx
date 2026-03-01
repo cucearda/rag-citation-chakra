@@ -74,23 +74,28 @@ const floatingStyles = defineStyle({
   },
 });
 
+const firstProjectPath =
+  projects.length > 0 ? `/projects/${projects[0].id}` : "/";
+
 export default function SignupForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const { signUpWithEmail, signInWithGoogle, loading, error } = useAuth();
   const navigate = useNavigate();
-
-  const firstProjectPath =
-    projects.length > 0 ? `/projects/${projects[0].id}` : "/";
+  const [activeProvider, setActiveProvider] = useState<"email" | "google" | null>(null);
 
   async function handleEmailSignup() {
+    setActiveProvider("email");
     const user = await signUpWithEmail(email, password);
+    setActiveProvider(null);
     if (user) navigate(firstProjectPath);
   }
 
   async function handleGoogleSignup() {
+    setActiveProvider("google");
     const user = await signInWithGoogle();
+    setActiveProvider(null);
     if (user) navigate(firstProjectPath);
   }
 
@@ -140,8 +145,8 @@ export default function SignupForm() {
           colorPalette="teal"
           w="full"
           size="lg"
-          onClick={handleEmailSignup}
-          loading={loading}
+          onClick={() => void handleEmailSignup()}
+          loading={activeProvider === "email"}
           disabled={password !== confirmPassword || loading}
         >
           Sign Up
@@ -161,8 +166,8 @@ export default function SignupForm() {
         w="full"
         size="lg"
         gap="3"
-        onClick={handleGoogleSignup}
-        loading={loading}
+        onClick={() => void handleGoogleSignup()}
+        loading={activeProvider === "google"}
         disabled={loading}
       >
         <FcGoogle size={20} />
