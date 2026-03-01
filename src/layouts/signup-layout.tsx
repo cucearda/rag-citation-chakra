@@ -1,14 +1,14 @@
 import { Outlet } from "react-router-dom";
 import { Flex, Center } from "@chakra-ui/react";
 import Navbar from "@/components/ui/Navbar";
-import LoginForm from "@/components/ui/loginComponents/LoginForm";
+import SignupForm from "@/components/ui/loginComponents/SignupForm";
 
-export default function LoginLayout() {
+export default function SignupLayout() {
   return (
     <Flex direction="column" h="100vh">
       <Navbar />
       <Center flex="1">
-        <LoginForm />
+        <SignupForm />
       </Center>
       <Outlet />
     </Flex>
