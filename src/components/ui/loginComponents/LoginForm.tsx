@@ -13,7 +13,9 @@ import {
 import type { InputProps } from "@chakra-ui/react";
 import { useState } from "react";
 import { FcGoogle } from "react-icons/fc";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
+import { projects } from "@/data/mockProjects";
 
 interface FloatingLabelInputProps extends InputProps {
   label: string;
@@ -73,12 +75,26 @@ const floatingStyles = defineStyle({
 });
 
 export default function LoginForm() {
-  const [_email, setEmail] = useState("");
-  const [_password, setPassword] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const { signInWithEmail, signInWithGoogle, loading, error } = useAuth();
+  const navigate = useNavigate();
+
+  const firstProjectPath =
+    projects.length > 0 ? `/projects/${projects[0].id}` : "/";
+
+  async function handleEmailLogin() {
+    const user = await signInWithEmail(email, password);
+    if (user) navigate(firstProjectPath);
+  }
+
+  async function handleGoogleLogin() {
+    const user = await signInWithGoogle();
+    if (user) navigate(firstProjectPath);
+  }
 
   return (
     <Stack
-      flexDirection="column"
       mb="2"
       justifyContent="center"
       alignItems="center"
@@ -105,7 +121,20 @@ export default function LoginForm() {
           />
         </Field.Root>
 
-        <Button colorPalette="teal" w="full" size="lg">
+        {error && (
+          <Text textStyle="sm" color="red.400">
+            {error}
+          </Text>
+        )}
+
+        <Button
+          colorPalette="teal"
+          w="full"
+          size="lg"
+          onClick={handleEmailLogin}
+          loading={loading}
+          disabled={loading}
+        >
           Sign In
         </Button>
       </Stack>
@@ -118,7 +147,15 @@ export default function LoginForm() {
         <Separator flex="1" />
       </Stack>
 
-      <Button variant="outline" w="full" size="lg" gap="3">
+      <Button
+        variant="outline"
+        w="full"
+        size="lg"
+        gap="3"
+        onClick={handleGoogleLogin}
+        loading={loading}
+        disabled={loading}
+      >
         <FcGoogle size={20} />
         Sign in with Google
       </Button>
