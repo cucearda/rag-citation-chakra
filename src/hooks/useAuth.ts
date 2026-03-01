@@ -8,6 +8,15 @@ import {
 } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 
+const googleProvider = new GoogleAuthProvider();
+
+function getFirebaseErrorCode(err: unknown): string {
+  if (typeof err === "object" && err !== null && "code" in err) {
+    return (err as { code: string }).code;
+  }
+  return "";
+}
+
 function getErrorMessage(code: string): string {
   switch (code) {
     case "auth/email-already-in-use":
@@ -40,8 +49,7 @@ export function useAuth() {
       const result = await createUserWithEmailAndPassword(auth, email, password);
       return result.user;
     } catch (err: unknown) {
-      const code = (err as { code?: string }).code ?? "";
-      setError(getErrorMessage(code));
+      setError(getErrorMessage(getFirebaseErrorCode(err)));
       return null;
     } finally {
       setLoading(false);
@@ -55,8 +63,7 @@ export function useAuth() {
       const result = await signInWithEmailAndPassword(auth, email, password);
       return result.user;
     } catch (err: unknown) {
-      const code = (err as { code?: string }).code ?? "";
-      setError(getErrorMessage(code));
+      setError(getErrorMessage(getFirebaseErrorCode(err)));
       return null;
     } finally {
       setLoading(false);
@@ -67,12 +74,10 @@ export function useAuth() {
     setLoading(true);
     setError(null);
     try {
-      const provider = new GoogleAuthProvider();
-      const result = await signInWithPopup(auth, provider);
+      const result = await signInWithPopup(auth, googleProvider);
       return result.user;
     } catch (err: unknown) {
-      const code = (err as { code?: string }).code ?? "";
-      setError(getErrorMessage(code));
+      setError(getErrorMessage(getFirebaseErrorCode(err)));
       return null;
     } finally {
       setLoading(false);
