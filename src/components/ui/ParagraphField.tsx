@@ -14,16 +14,16 @@ export default function ParagraphField() {
   const [text, setText] = useState("");
 
   return (
-    <Stack border="2px solid" borderColor="gray.300" padding="10px" margin="15px" borderRadius="md" boxShadow="md">
-      <Box position="relative">
+    <Stack border="2px solid" borderColor="gray.300" padding="10px" margin="15px" borderRadius="md" boxShadow="md" flex="1" minH="0">
+      <Box position="relative" flex="1" display="flex" flexDirection="column" minH="0">
         <Textarea
           placeholder="enter your paragraph here"
           size="xl"
-          rows={8}
           value={text}
           onChange={(e) => setText(e.target.value)}
           paddingBottom="50px"
           boxShadow="md"
+          style={{ flex: 1 }}
         />
         <IconButton
           aria-label="Submit"
