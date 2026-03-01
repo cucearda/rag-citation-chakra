@@ -4,6 +4,11 @@ const items = [
   { id: 1, fileName: "xfd.pdf", title:"Hope in startups",authors: "Arda et. al", year: 1999 },
   { id: 2, fileName: "hello.pdf", title: "a VeryVery VeryVery VeryVery VeryVery VeryVery Long Title",authors: "Johnson Watson", year: 2007 },
   { id: 3, fileName: "zuko.pdf", title:"", authors: "Marry Jane Sakso", year: 1453 },
+    { id: 1, fileName: "xfd.pdf", title:"Hope in startups",authors: "Arda et. al", year: 1999 },
+  { id: 2, fileName: "hello.pdf", title: "a VeryVery VeryVery VeryVery VeryVery VeryVery Long Title",authors: "Johnson Watson", year: 2007 },
+  { id: 3, fileName: "zuko.pdf", title:"", authors: "Marry Jane Sakso", year: 1453 },  { id: 1, fileName: "xfd.pdf", title:"Hope in startups",authors: "Arda et. al", year: 1999 },
+  { id: 2, fileName: "hello.pdf", title: "a VeryVery VeryVery VeryVery VeryVery VeryVery Long Title",authors: "Johnson Watson", year: 2007 },
+  { id: 3, fileName: "zuko.pdf", title:"", authors: "Marry Jane Sakso", year: 1453 },
 ]
 
 export default function UploadedDocumentsTable() {

@@ -72,9 +72,10 @@ const floatingStyles = defineStyle({
   },
 });
 
-export default function LoginForm() {
+export default function SignupForm() {
   const [_email, setEmail] = useState("");
   const [_password, setPassword] = useState("");
+  const [_confirmPassword, setConfirmPassword] = useState("");
 
   return (
     <Stack
@@ -86,7 +87,7 @@ export default function LoginForm() {
       maxW="sm"
       gap="6"
     >
-      <Heading color="teal.400">Welcome</Heading>
+      <Heading color="teal.400">Create Account</Heading>
 
       <Stack w="full" gap="5">
         <Field.Root>
@@ -105,8 +106,16 @@ export default function LoginForm() {
           />
         </Field.Root>
 
+        <Field.Root>
+          <FloatingLabelInput
+            label="Confirm Password"
+            type="password"
+            onValueChange={setConfirmPassword}
+          />
+        </Field.Root>
+
         <Button colorPalette="teal" w="full" size="lg">
-          Sign In
+          Sign Up
         </Button>
       </Stack>
 
@@ -120,14 +129,14 @@ export default function LoginForm() {
 
       <Button variant="outline" w="full" size="lg" gap="3">
         <FcGoogle size={20} />
-        Sign in with Google
+        Sign up with Google
       </Button>
 
       <Text textStyle="sm" color="fg.muted">
-        Do not have an account yet?{" "}
-        <Link to="/signup">
+        Already have an account?{" "}
+        <Link to="/login">
           <Text as="span" color="teal.400" fontWeight="semibold">
-            Sign up
+            Sign in
           </Text>
         </Link>
       </Text>
