@@ -1,4 +1,4 @@
-import { Flex, Box, Heading, Button, Spacer, HStack } from "@chakra-ui/react";
+import { Flex, Heading, Button, Spacer, HStack } from "@chakra-ui/react";
 
 export default function Navbar() {
   return (

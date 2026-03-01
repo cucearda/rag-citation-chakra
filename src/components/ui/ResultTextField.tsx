@@ -1,5 +1,4 @@
-import { Box, Stack, Textarea } from "@chakra-ui/react";
-import React from "react";
+import { Box, Textarea } from "@chakra-ui/react";
 
 export default function ResultTextField() {
   return (

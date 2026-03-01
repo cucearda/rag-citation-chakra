@@ -7,7 +7,7 @@ import {
   Button,
 } from "@chakra-ui/react";
 import { HiUpload } from "react-icons/hi";
-import React, { useState } from "react";
+import { useState } from "react";
 import { LuArrowRight } from "react-icons/lu";
 
 export default function ParagraphField() {
