@@ -14,7 +14,10 @@ const router = createBrowserRouter([
     path: '/',
     element: <RootLayout />,
     children: [
-      { index: true, element: <Navigate to={`/projects/${projects[0].id}`} replace /> },
+      { index: true, element: projects.length > 0
+          ? <Navigate to={`/projects/${projects[0].id}`} replace />
+          : <Navigate to="/projects/empty" replace />
+      },
       {
         path: 'projects/:projectId',
         element: <ProjectLayout />,
