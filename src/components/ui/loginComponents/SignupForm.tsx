@@ -85,7 +85,6 @@ export default function SignupForm() {
     projects.length > 0 ? `/projects/${projects[0].id}` : "/";
 
   async function handleEmailSignup() {
-    if (password !== confirmPassword) return;
     const user = await signUpWithEmail(email, password);
     if (user) navigate(firstProjectPath);
   }
@@ -97,7 +96,6 @@ export default function SignupForm() {
 
   return (
     <Stack
-      flexDirection="column"
       mb="2"
       justifyContent="center"
       alignItems="center"
