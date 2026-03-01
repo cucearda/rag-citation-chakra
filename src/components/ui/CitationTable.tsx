@@ -13,8 +13,8 @@ interface Citation {
   end: number
   reason: string
   source: CitationSource
-  relevant_quote: string
-  relevance_explanation: string
+  relevantQuote: string
+  relevanceExplanation: string
 }
 
 const items: Citation[] = [
@@ -24,8 +24,8 @@ const items: Citation[] = [
     end: 42,
     reason: "Directly supports the claim about startup growth rates",
     source: { fileName: "xfd.pdf", title: "Hope in startups", authors: "Arda et. al", year: 1999 },
-    relevant_quote: "Startups that receive early funding grow 3x faster on average.",
-    relevance_explanation: "This quote directly backs the paragraph's claim about early-stage funding impact.",
+    relevantQuote: "Startups that receive early funding grow 3x faster on average.",
+    relevanceExplanation: "This quote directly backs the paragraph's claim about early-stage funding impact.",
   },
   {
     id: 2,
@@ -33,8 +33,8 @@ const items: Citation[] = [
     end: 110,
     reason: "Provides empirical evidence for the stated market trends",
     source: { fileName: "hello.pdf", title: "A Very Long Title About Markets", authors: "Johnson Watson", year: 2007 },
-    relevant_quote: "Market consolidation accelerates when venture capital exceeds $1B in a sector.",
-    relevance_explanation: "The quote corroborates the market trend described in the highlighted span.",
+    relevantQuote: "Market consolidation accelerates when venture capital exceeds $1B in a sector.",
+    relevanceExplanation: "The quote corroborates the market trend described in the highlighted span.",
   },
   {
     id: 3,
@@ -42,8 +42,8 @@ const items: Citation[] = [
     end: 200,
     reason: "Historical precedent for the argument made",
     source: { fileName: "zuko.pdf", title: "", authors: "Marry Jane Sakso", year: 1453 },
-    relevant_quote: "Early trade networks followed patterns remarkably similar to modern distribution chains.",
-    relevance_explanation: "Provides historical grounding for the analogy drawn in the paragraph.",
+    relevantQuote: "Early trade networks followed patterns remarkably similar to modern distribution chains.",
+    relevanceExplanation: "Provides historical grounding for the analogy drawn in the paragraph.",
   },
     {
     id: 1,
@@ -51,8 +51,8 @@ const items: Citation[] = [
     end: 42,
     reason: "Directly supports the claim about startup growth rates",
     source: { fileName: "xfd.pdf", title: "Hope in startups", authors: "Arda et. al", year: 1999 },
-    relevant_quote: "Startups that receive early funding grow 3x faster on average.",
-    relevance_explanation: "This quote directly backs the paragraph's claim about early-stage funding impact.",
+    relevantQuote: "Startups that receive early funding grow 3x faster on average.",
+    relevanceExplanation: "This quote directly backs the paragraph's claim about early-stage funding impact.",
   },
   {
     id: 2,
@@ -60,8 +60,8 @@ const items: Citation[] = [
     end: 110,
     reason: "Provides empirical evidence for the stated market trends",
     source: { fileName: "hello.pdf", title: "A Very Long Title About Markets", authors: "Johnson Watson", year: 2007 },
-    relevant_quote: "Market consolidation accelerates when venture capital exceeds $1B in a sector.",
-    relevance_explanation: "The quote corroborates the market trend described in the highlighted span.",
+    relevantQuote: "Market consolidation accelerates when venture capital exceeds $1B in a sector.",
+    relevanceExplanation: "The quote corroborates the market trend described in the highlighted span.",
   },
   {
     id: 3,
@@ -69,8 +69,8 @@ const items: Citation[] = [
     end: 200,
     reason: "Historical precedent for the argument made",
     source: { fileName: "zuko.pdf", title: "", authors: "Marry Jane Sakso", year: 1453 },
-    relevant_quote: "Early trade networks followed patterns remarkably similar to modern distribution chains.",
-    relevance_explanation: "Provides historical grounding for the analogy drawn in the paragraph.",
+    relevantQuote: "Early trade networks followed patterns remarkably similar to modern distribution chains.",
+    relevanceExplanation: "Provides historical grounding for the analogy drawn in the paragraph.",
   },
     {
     id: 1,
@@ -78,8 +78,8 @@ const items: Citation[] = [
     end: 42,
     reason: "Directly supports the claim about startup growth rates",
     source: { fileName: "xfd.pdf", title: "Hope in startups", authors: "Arda et. al", year: 1999 },
-    relevant_quote: "Startups that receive early funding grow 3x faster on average.",
-    relevance_explanation: "This quote directly backs the paragraph's claim about early-stage funding impact.",
+    relevantQuote: "Startups that receive early funding grow 3x faster on average.",
+    relevanceExplanation: "This quote directly backs the paragraph's claim about early-stage funding impact.",
   },
   {
     id: 2,
@@ -87,8 +87,8 @@ const items: Citation[] = [
     end: 110,
     reason: "Provides empirical evidence for the stated market trends",
     source: { fileName: "hello.pdf", title: "A Very Long Title About Markets", authors: "Johnson Watson", year: 2007 },
-    relevant_quote: "Market consolidation accelerates when venture capital exceeds $1B in a sector.",
-    relevance_explanation: "The quote corroborates the market trend described in the highlighted span.",
+    relevantQuote: "Market consolidation accelerates when venture capital exceeds $1B in a sector.",
+    relevanceExplanation: "The quote corroborates the market trend described in the highlighted span.",
   },
   {
     id: 3,
@@ -96,8 +96,8 @@ const items: Citation[] = [
     end: 200,
     reason: "Historical precedent for the argument made",
     source: { fileName: "zuko.pdf", title: "", authors: "Marry Jane Sakso", year: 1453 },
-    relevant_quote: "Early trade networks followed patterns remarkably similar to modern distribution chains.",
-    relevance_explanation: "Provides historical grounding for the analogy drawn in the paragraph.",
+    relevantQuote: "Early trade networks followed patterns remarkably similar to modern distribution chains.",
+    relevanceExplanation: "Provides historical grounding for the analogy drawn in the paragraph.",
   },
 ]
 
@@ -121,8 +121,8 @@ export default function CitationTable() {
               <small>{item.source.authors}, {item.source.year}</small>
             </Table.Cell>
             <Table.Cell>{item.reason}</Table.Cell>
-            <Table.Cell fontStyle="italic">"{item.relevant_quote}"</Table.Cell>
-            <Table.Cell>{item.relevance_explanation}</Table.Cell>
+            <Table.Cell fontStyle="italic">"{item.relevantQuote}"</Table.Cell>
+            <Table.Cell>{item.relevanceExplanation}</Table.Cell>
           </Table.Row>
         ))}
       </Table.Body>
