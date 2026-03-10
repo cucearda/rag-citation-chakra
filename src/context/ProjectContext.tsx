@@ -5,6 +5,7 @@ import { useParams } from "react-router-dom"
 interface ProjectContextValue {
   projectId: string
   documents: Document[]
+  allDocuments: Document[]
   addDocument: (fileName: string) => void
   removeDocument: (id: number) => void
 }
@@ -35,7 +36,7 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
 
   return (
     <ProjectContext.Provider
-      value={{ projectId, documents: projectDocuments, addDocument, removeDocument }}
+      value={{ projectId, documents: projectDocuments, allDocuments: documents, addDocument, removeDocument }}
     >
       {children}
     </ProjectContext.Provider>

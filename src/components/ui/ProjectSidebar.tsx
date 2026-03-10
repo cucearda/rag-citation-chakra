@@ -15,7 +15,7 @@ const COLLAPSED_WIDTH = "48px"
 
 export default function ProjectSidebar() {
   const navigate = useNavigate()
-  const { projectId, documents, removeDocument } = useProjectContext()
+  const { projectId, allDocuments, removeDocument } = useProjectContext()
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [projects, setProjects] = useState<Project[]>(initialProjects)
   const [creating, setCreating] = useState(false)
@@ -131,6 +131,7 @@ export default function ProjectSidebar() {
           {projects.map((project) => {
             const isActive = project.id === projectId
             const isFilesOpen = expandedProjects.has(project.id)
+            const projectDocs = allDocuments.filter((d) => d.projectId === project.id)
 
             return (
               <Box key={project.id}>
@@ -169,12 +170,12 @@ export default function ProjectSidebar() {
                 </HStack>
 
                 {/* File list under project — only shown for active project */}
-                {sidebarOpen && isFilesOpen && isActive && (
+                {sidebarOpen && isFilesOpen && (
                   <VStack gap="0" align="stretch" pl="6" pr="2" pb="1">
-                    {documents.length === 0 && (
+                    {projectDocs.length === 0 && (
                       <Text fontSize="xs" color="textSecondary" px="2" py="1">No files yet</Text>
                     )}
-                    {documents.map((doc) => (
+                    {projectDocs.map((doc) => (
                       <FileRow
                         key={doc.id}
                         fileName={doc.fileName}
