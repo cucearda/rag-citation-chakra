@@ -4,7 +4,7 @@ import RootLayout from './layouts/root-layout'
 import ProjectLayout from './layouts/project-layout'
 import LoginLayout from './layouts/login-layout'
 import SignupLayout from './layouts/signup-layout'
-import CompleteWorkstation from './components/ui/CompleteWorkstation'
+import ConversationView from './components/ui/ConversationView'
 import { projects } from './data/mockProjects'
 
 const router = createBrowserRouter([
@@ -21,7 +21,7 @@ const router = createBrowserRouter([
       {
         path: 'projects/:projectId',
         element: <ProjectLayout />,
-        children: [{ index: true, element: <CompleteWorkstation /> }],
+        children: [{ index: true, element: <ConversationView /> }],
       },
     ],
   },
