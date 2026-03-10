@@ -1,8 +1,9 @@
 import { useRef, useEffect, useState } from "react"
 import { Box, Text, VStack } from "@chakra-ui/react"
 import { useParams } from "react-router-dom"
-import { projects, citations } from "@/data/mockProjects"
+import { citations } from "@/data/mockProjects"
 import type { Citation } from "@/data/mockProjects"
+import { useProjectContext } from "@/context/ProjectContext"
 import CitationCard from "./CitationCard"
 import ChatInputBar from "./ChatInputBar"
 
@@ -23,6 +24,7 @@ const MOCK_AI_RESPONSE = "Here is your paragraph with citations applied based on
 
 export default function ConversationView() {
   const { projectId = "" } = useParams<{ projectId: string }>()
+  const { projects } = useProjectContext()
   const [messages, setMessages] = useState<Message[]>([])
   const bottomRef = useRef<HTMLDivElement>(null)
 

@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import {
   Box, VStack, Text, IconButton, Button, Input, HStack, Dialog, Portal, CloseButton,
 } from "@chakra-ui/react"
@@ -6,7 +6,6 @@ import {
   LuChevronLeft, LuChevronRight, LuChevronDown, LuPlus, LuTrash2, LuFileText,
 } from "react-icons/lu"
 import { useNavigate } from "react-router-dom"
-import { projects as initialProjects } from "@/data/mockProjects"
 import type { Project } from "@/data/mockProjects"
 import { useProjectContext } from "@/context/ProjectContext"
 
@@ -15,15 +14,18 @@ const COLLAPSED_WIDTH = "48px"
 
 export default function ProjectSidebar() {
   const navigate = useNavigate()
-  const { projectId, allDocuments, removeDocument } = useProjectContext()
+  const { projectId, projects, addProject, removeProject, allDocuments, removeDocument } = useProjectContext()
   const [sidebarOpen, setSidebarOpen] = useState(true)
-  const [projects, setProjects] = useState<Project[]>(initialProjects)
   const [creating, setCreating] = useState(false)
   const [newName, setNewName] = useState("")
   const [deleteTarget, setDeleteTarget] = useState<Project | null>(null)
   const [expandedProjects, setExpandedProjects] = useState<Set<string>>(
     new Set([projectId])
   )
+
+  useEffect(() => {
+    setExpandedProjects((prev) => new Set([...prev, projectId]))
+  }, [projectId])
 
   function toggleProjectFiles(id: string) {
     setExpandedProjects((prev) => {
@@ -42,7 +44,7 @@ export default function ProjectSidebar() {
     }).catch(() => null)
     const id = res?.ok ? (await res.json()).id : `proj-${Date.now()}`
     const created: Project = { id, name: newName.trim() }
-    setProjects((prev) => [...prev, created])
+    addProject(created)
     setNewName("")
     setCreating(false)
     navigate(`/projects/${id}`)
@@ -50,10 +52,10 @@ export default function ProjectSidebar() {
 
   async function handleDelete(project: Project) {
     await fetch(`/api/projects/${project.id}`, { method: "DELETE" }).catch(() => null)
-    const remaining = projects.filter((p) => p.id !== project.id)
-    setProjects(remaining)
+    removeProject(project.id)
     setDeleteTarget(null)
     if (projectId === project.id) {
+      const remaining = projects.filter((p) => p.id !== project.id)
       navigate(remaining.length > 0 ? `/projects/${remaining[0].id}` : "/")
     }
   }

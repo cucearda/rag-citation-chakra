@@ -1,9 +1,12 @@
 import { createContext, useContext, useState, type ReactNode } from "react"
-import { documents as initialDocuments, type Document } from "@/data/mockProjects"
+import { documents as initialDocuments, projects as initialProjects, type Document, type Project } from "@/data/mockProjects"
 import { useParams } from "react-router-dom"
 
 interface ProjectContextValue {
   projectId: string
+  projects: Project[]
+  addProject: (project: Project) => void
+  removeProject: (id: string) => void
   documents: Document[]
   allDocuments: Document[]
   addDocument: (fileName: string) => void
@@ -14,9 +17,18 @@ const ProjectContext = createContext<ProjectContextValue | null>(null)
 
 export function ProjectProvider({ children }: { children: ReactNode }) {
   const { projectId = "" } = useParams<{ projectId: string }>()
+  const [projects, setProjects] = useState<Project[]>(initialProjects)
   const [documents, setDocuments] = useState<Document[]>(initialDocuments)
 
   const projectDocuments = documents.filter((d) => d.projectId === projectId)
+
+  function addProject(project: Project) {
+    setProjects((prev) => [...prev, project])
+  }
+
+  function removeProject(id: string) {
+    setProjects((prev) => prev.filter((p) => p.id !== id))
+  }
 
   function addDocument(fileName: string) {
     const newDoc: Document = {
@@ -36,7 +48,7 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
 
   return (
     <ProjectContext.Provider
-      value={{ projectId, documents: projectDocuments, allDocuments: documents, addDocument, removeDocument }}
+      value={{ projectId, projects, addProject, removeProject, documents: projectDocuments, allDocuments: documents, addDocument, removeDocument }}
     >
       {children}
     </ProjectContext.Provider>
