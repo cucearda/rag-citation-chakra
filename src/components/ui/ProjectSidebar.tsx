@@ -1,29 +1,37 @@
 import { useState } from "react"
 import {
-  Box,
-  VStack,
-  Text,
-  IconButton,
-  Button,
-  Input,
-  HStack,
-  Dialog,
-  Portal,
-  CloseButton,
+  Box, VStack, Text, IconButton, Button, Input, HStack, Dialog, Portal, CloseButton,
 } from "@chakra-ui/react"
-import { LuChevronLeft, LuChevronRight, LuPlus, LuTrash2 } from "react-icons/lu"
-import { useParams, useNavigate } from "react-router-dom"
+import {
+  LuChevronLeft, LuChevronRight, LuChevronDown, LuPlus, LuTrash2, LuFileText,
+} from "react-icons/lu"
+import { useNavigate } from "react-router-dom"
 import { projects as initialProjects } from "@/data/mockProjects"
 import type { Project } from "@/data/mockProjects"
+import { useProjectContext } from "@/context/ProjectContext"
+
+const EXPANDED_WIDTH = "220px"
+const COLLAPSED_WIDTH = "48px"
 
 export default function ProjectSidebar() {
-  const { projectId } = useParams<{ projectId: string }>()
   const navigate = useNavigate()
-  const [expanded, setExpanded] = useState(true)
+  const { projectId, documents, removeDocument } = useProjectContext()
+  const [sidebarOpen, setSidebarOpen] = useState(true)
   const [projects, setProjects] = useState<Project[]>(initialProjects)
   const [creating, setCreating] = useState(false)
   const [newName, setNewName] = useState("")
   const [deleteTarget, setDeleteTarget] = useState<Project | null>(null)
+  const [expandedProjects, setExpandedProjects] = useState<Set<string>>(
+    new Set([projectId])
+  )
+
+  function toggleProjectFiles(id: string) {
+    setExpandedProjects((prev) => {
+      const next = new Set(prev)
+      next.has(id) ? next.delete(id) : next.add(id)
+      return next
+    })
+  }
 
   async function handleCreate() {
     if (!newName.trim()) return
@@ -32,7 +40,6 @@ export default function ProjectSidebar() {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name: newName.trim() }),
     }).catch(() => null)
-
     const id = res?.ok ? (await res.json()).id : `proj-${Date.now()}`
     const created: Project = { id, name: newName.trim() }
     setProjects((prev) => [...prev, created])
@@ -51,82 +58,68 @@ export default function ProjectSidebar() {
     }
   }
 
-  const EXPANDED_WIDTH = "220px"
-  const COLLAPSED_WIDTH = "48px"
-
   return (
     <>
       <Box
-        w={expanded ? EXPANDED_WIDTH : COLLAPSED_WIDTH}
-        minW={expanded ? EXPANDED_WIDTH : COLLAPSED_WIDTH}
+        w={sidebarOpen ? EXPANDED_WIDTH : COLLAPSED_WIDTH}
+        minW={sidebarOpen ? EXPANDED_WIDTH : COLLAPSED_WIDTH}
         borderRight="1px solid"
-        borderColor="gray.200"
+        borderColor="borderDefault"
         display="flex"
         flexDirection="column"
         transition="width 0.2s, min-width 0.2s"
         overflow="hidden"
-        bg="bg"
+        bg="sidebar"
       >
         {/* Header */}
         <HStack
-          px="2"
-          py="3"
-          justifyContent={expanded ? "space-between" : "center"}
+          px="2" py="3"
+          justifyContent={sidebarOpen ? "space-between" : "center"}
           borderBottom="1px solid"
-          borderColor="gray.200"
+          borderColor="borderDefault"
         >
-          {expanded && (
-            <Text fontWeight="bold" fontSize="sm" ml="1">
+          {sidebarOpen && (
+            <Text fontWeight="semibold" fontSize="sm" ml="1" color="fg">
               Projects
             </Text>
           )}
           <IconButton
-            aria-label={expanded ? "Collapse sidebar" : "Expand sidebar"}
-            variant="ghost"
-            size="sm"
-            onClick={() => setExpanded((e) => !e)}
+            aria-label={sidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
+            variant="ghost" size="sm"
+            onClick={() => setSidebarOpen((e) => !e)}
           >
-            {expanded ? <LuChevronLeft /> : <LuChevronRight />}
+            {sidebarOpen ? <LuChevronLeft /> : <LuChevronRight />}
           </IconButton>
         </HStack>
 
         {/* New project button */}
-        <Box px="2" py="2" borderBottom="1px solid" borderColor="gray.100">
-          {expanded ? (
+        <Box px="2" py="2" borderBottom="1px solid" borderColor="borderDefault">
+          {sidebarOpen ? (
             creating ? (
               <VStack gap="1" align="stretch">
                 <Input
-                  size="sm"
-                  autoFocus
-                  placeholder="Project name"
+                  size="sm" autoFocus placeholder="Project name"
                   value={newName}
                   onChange={(e) => setNewName(e.target.value)}
                   onKeyDown={(e) => {
-                    if (e.key === "Enter") handleCreate()
+                    if (e.key === "Enter") void handleCreate()
                     if (e.key === "Escape") { setCreating(false); setNewName("") }
                   }}
                 />
                 <HStack gap="1">
-                  <Button size="xs" colorPalette="green" flex="1" onClick={handleCreate}>
-                    Create
-                  </Button>
-                  <Button size="xs" variant="outline" flex="1" onClick={() => { setCreating(false); setNewName("") }}>
-                    Cancel
-                  </Button>
+                  <Button size="xs" colorPalette="orange" flex="1" onClick={() => void handleCreate()}>Create</Button>
+                  <Button size="xs" variant="outline" flex="1" onClick={() => { setCreating(false); setNewName("") }}>Cancel</Button>
                 </HStack>
               </VStack>
             ) : (
-              <Button size="sm" variant="outline" w="full" onClick={() => setCreating(true)}>
+              <Button size="sm" variant="ghost" w="full" justifyContent="flex-start" onClick={() => setCreating(true)}>
                 <LuPlus /> New Project
               </Button>
             )
           ) : (
             <IconButton
-              aria-label="New project"
-              variant="ghost"
-              size="sm"
-              w="full"
-              onClick={() => { setExpanded(true); setCreating(true) }}
+              aria-label="New project" variant="ghost" size="sm" w="full"
+              onClick={() => { setSidebarOpen(true); setCreating(true) }}
             >
               <LuPlus />
             </IconButton>
@@ -135,20 +128,68 @@ export default function ProjectSidebar() {
 
         {/* Project list */}
         <VStack gap="0" align="stretch" flex="1" overflowY="auto" py="1">
-          {projects.map((project) => (
-            <ProjectItem
-              key={project.id}
-              project={project}
-              active={project.id === projectId}
-              expanded={expanded}
-              onSelect={() => navigate(`/projects/${project.id}`)}
-              onDelete={() => setDeleteTarget(project)}
-            />
-          ))}
+          {projects.map((project) => {
+            const isActive = project.id === projectId
+            const isFilesOpen = expandedProjects.has(project.id)
+
+            return (
+              <Box key={project.id}>
+                <HStack
+                  px="2" py="1.5"
+                  cursor="pointer"
+                  bg={isActive ? "bg.subtle" : "transparent"}
+                  borderRadius="md" mx="1" gap="1"
+                  justifyContent={sidebarOpen ? "space-between" : "center"}
+                  _hover={{ bg: "bg.subtle" }}
+                  onClick={() => navigate(`/projects/${project.id}`)}
+                >
+                  {sidebarOpen ? (
+                    <>
+                      <IconButton
+                        aria-label="Toggle files"
+                        variant="ghost" size="2xs"
+                        onClick={(e) => { e.stopPropagation(); toggleProjectFiles(project.id) }}
+                      >
+                        {isFilesOpen ? <LuChevronDown /> : <LuChevronRight />}
+                      </IconButton>
+                      <Text fontSize="sm" fontWeight={isActive ? "semibold" : "normal"} flex="1" truncate>
+                        {project.name}
+                      </Text>
+                      <IconButton
+                        aria-label="Delete project" variant="ghost" size="2xs"
+                        colorPalette="red"
+                        onClick={(e) => { e.stopPropagation(); setDeleteTarget(project) }}
+                      >
+                        <LuTrash2 />
+                      </IconButton>
+                    </>
+                  ) : (
+                    <Box w="8px" h="8px" borderRadius="full" bg={isActive ? "orange.500" : "gray.300"} />
+                  )}
+                </HStack>
+
+                {/* File list under project — only shown for active project */}
+                {sidebarOpen && isFilesOpen && isActive && (
+                  <VStack gap="0" align="stretch" pl="6" pr="2" pb="1">
+                    {documents.length === 0 && (
+                      <Text fontSize="xs" color="textSecondary" px="2" py="1">No files yet</Text>
+                    )}
+                    {documents.map((doc) => (
+                      <FileRow
+                        key={doc.id}
+                        fileName={doc.fileName}
+                        onDelete={() => removeDocument(doc.id)}
+                      />
+                    ))}
+                  </VStack>
+                )}
+              </Box>
+            )
+          })}
         </VStack>
       </Box>
 
-      {/* Delete confirmation dialog */}
+      {/* Delete project dialog */}
       <Dialog.Root
         role="alertdialog"
         open={!!deleteTarget}
@@ -159,27 +200,17 @@ export default function ProjectSidebar() {
           <Dialog.Backdrop />
           <Dialog.Positioner>
             <Dialog.Content>
-              <Dialog.Header>
-                <Dialog.Title>Delete project?</Dialog.Title>
-              </Dialog.Header>
+              <Dialog.Header><Dialog.Title>Delete project?</Dialog.Title></Dialog.Header>
               <Dialog.Body>
-                <Text>
-                  Delete "{deleteTarget?.name}"? This cannot be undone.
-                </Text>
+                <Text>Delete "{deleteTarget?.name}"? This cannot be undone.</Text>
               </Dialog.Body>
               <Dialog.Footer>
                 <Dialog.ActionTrigger asChild>
-                  <Button variant="outline" onClick={() => setDeleteTarget(null)}>
-                    Cancel
-                  </Button>
+                  <Button variant="outline" onClick={() => setDeleteTarget(null)}>Cancel</Button>
                 </Dialog.ActionTrigger>
-                <Button colorPalette="red" onClick={() => deleteTarget && handleDelete(deleteTarget)}>
-                  Delete
-                </Button>
+                <Button colorPalette="red" onClick={() => deleteTarget && void handleDelete(deleteTarget)}>Delete</Button>
               </Dialog.Footer>
-              <Dialog.CloseTrigger asChild>
-                <CloseButton size="sm" />
-              </Dialog.CloseTrigger>
+              <Dialog.CloseTrigger asChild><CloseButton size="sm" /></Dialog.CloseTrigger>
             </Dialog.Content>
           </Dialog.Positioner>
         </Portal>
@@ -188,62 +219,22 @@ export default function ProjectSidebar() {
   )
 }
 
-interface ProjectItemProps {
-  project: Project
-  active: boolean
-  expanded: boolean
-  onSelect: () => void
-  onDelete: () => void
-}
-
-function ProjectItem({ project, active, expanded, onSelect, onDelete }: ProjectItemProps) {
-  const [hovered, setHovered] = useState(false)
-
+function FileRow({ fileName, onDelete }: { fileName: string; onDelete: () => void }) {
   return (
     <HStack
-      px="2"
-      py="2"
-      cursor="pointer"
-      bg={active ? "colorPalette.subtle" : hovered ? "bg.subtle" : "transparent"}
-      colorPalette="blue"
-      borderRadius="md"
-      mx="1"
-      gap="2"
-      justifyContent={expanded ? "space-between" : "center"}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      onClick={onSelect}
+      px="2" py="1" borderRadius="md" gap="1.5"
+      _hover={{ bg: "bg.subtle" }}
+      role="group"
     >
-      {expanded ? (
-        <>
-          <Text
-            fontSize="sm"
-            fontWeight={active ? "semibold" : "normal"}
-            truncate
-            flex="1"
-          >
-            {project.name}
-          </Text>
-          {hovered && (
-            <IconButton
-              aria-label="Delete project"
-              variant="ghost"
-              size="xs"
-              colorPalette="red"
-              onClick={(e) => { e.stopPropagation(); onDelete() }}
-            >
-              <LuTrash2 />
-            </IconButton>
-          )}
-        </>
-      ) : (
-        <Box
-          w="8px"
-          h="8px"
-          borderRadius="full"
-          bg={active ? "colorPalette.solid" : "gray.300"}
-        />
-      )}
+      <LuFileText size={12} color="var(--chakra-colors-textSecondary)" />
+      <Text fontSize="xs" flex="1" truncate color="fg.muted">{fileName}</Text>
+      <IconButton
+        aria-label="Delete file" variant="ghost" size="2xs"
+        colorPalette="red"
+        onClick={onDelete}
+      >
+        <LuTrash2 />
+      </IconButton>
     </HStack>
   )
 }
