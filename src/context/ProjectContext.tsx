@@ -1,55 +1,32 @@
-import { createContext, useContext, useState, type ReactNode } from "react"
-import { documents as initialDocuments, projects as initialProjects, type Document, type Project } from "@/data/mockProjects"
+import { createContext, useContext, type ReactNode } from "react"
 import { useParams } from "react-router-dom"
+import { useProjects } from "@/hooks/useProjects"
+import type { ApiProject } from "@/types/api"
 
 interface ProjectContextValue {
   projectId: string
-  projects: Project[]
-  addProject: (project: Project) => void
-  removeProject: (id: string) => void
-  documents: Document[]
-  allDocuments: Document[]
-  addDocument: (fileName: string) => void
-  removeDocument: (id: number) => void
+  projects: ApiProject[]
+  projectsLoading: boolean
+  projectsError: string | null
+  createProject: (name: string) => Promise<ApiProject>
+  removeProject: (id: string) => Promise<void>
 }
 
 const ProjectContext = createContext<ProjectContextValue | null>(null)
 
 export function ProjectProvider({ children }: { children: ReactNode }) {
   const { projectId = "" } = useParams<{ projectId: string }>()
-  const [projects, setProjects] = useState<Project[]>(initialProjects)
-  const [documents, setDocuments] = useState<Document[]>(initialDocuments)
-
-  const projectDocuments = documents.filter((d) => d.projectId === projectId)
-
-  function addProject(project: Project) {
-    setProjects((prev) => [...prev, project])
-  }
-
-  function removeProject(id: string) {
-    setProjects((prev) => prev.filter((p) => p.id !== id))
-  }
-
-  function addDocument(fileName: string) {
-    const newDoc: Document = {
-      id: Date.now(),
-      projectId,
-      fileName,
-      title: "",
-      authors: "",
-      year: new Date().getFullYear(),
-    }
-    setDocuments((prev) => [...prev, newDoc])
-  }
-
-  function removeDocument(id: number) {
-    setDocuments((prev) => prev.filter((d) => d.id !== id))
-  }
+  const { projects, loading, error, create, remove } = useProjects()
 
   return (
-    <ProjectContext.Provider
-      value={{ projectId, projects, addProject, removeProject, documents: projectDocuments, allDocuments: documents, addDocument, removeDocument }}
-    >
+    <ProjectContext.Provider value={{
+      projectId,
+      projects,
+      projectsLoading: loading,
+      projectsError: error,
+      createProject: create,
+      removeProject: remove,
+    }}>
       {children}
     </ProjectContext.Provider>
   )
