@@ -2,7 +2,9 @@ import { apiFetch } from "@/lib/apiClient"
 import type { ApiProject } from "@/types/api"
 
 export async function listProjects(): Promise<ApiProject[]> {
-  const res = await apiFetch("/projects")
+  const res = await apiFetch("/projects", {
+    method: "GET"
+  })
   return res.json()
 }
 
