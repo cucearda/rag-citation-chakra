@@ -5,6 +5,7 @@ import ProjectLayout from './layouts/project-layout'
 import LoginLayout from './layouts/login-layout'
 import SignupLayout from './layouts/signup-layout'
 import ConversationView from './components/ui/ConversationView'
+import { AuthProvider } from './context/AuthContext'
 
 const router = createBrowserRouter([
   { path: '/login', element: <LoginLayout /> },
@@ -24,7 +25,11 @@ const router = createBrowserRouter([
 ])
 
 function App() {
-  return <RouterProvider router={router} />
+  return (
+    <AuthProvider>
+      <RouterProvider router={router} />
+    </AuthProvider>
+  )
 }
 
 export default App
