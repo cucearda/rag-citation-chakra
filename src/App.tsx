@@ -1,11 +1,10 @@
 import './App.css'
-import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom'
+import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import RootLayout from './layouts/root-layout'
 import ProjectLayout from './layouts/project-layout'
 import LoginLayout from './layouts/login-layout'
 import SignupLayout from './layouts/signup-layout'
 import ConversationView from './components/ui/ConversationView'
-import { projects } from './data/mockProjects'
 
 const router = createBrowserRouter([
   { path: '/login', element: <LoginLayout /> },
@@ -14,10 +13,7 @@ const router = createBrowserRouter([
     path: '/',
     element: <RootLayout />,
     children: [
-      { index: true, element: projects.length > 0
-          ? <Navigate to={`/projects/${projects[0].id}`} replace />
-          : <Navigate to="/projects/empty" replace />
-      },
+      { index: true, element: null },
       {
         path: 'projects/:projectId',
         element: <ProjectLayout />,

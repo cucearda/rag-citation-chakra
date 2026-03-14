@@ -15,7 +15,6 @@ import { useState } from "react";
 import { FcGoogle } from "react-icons/fc";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
-import { projects } from "@/data/mockProjects";
 
 interface FloatingLabelInputProps extends InputProps {
   label: string;
@@ -74,9 +73,6 @@ const floatingStyles = defineStyle({
   },
 });
 
-const firstProjectPath =
-  projects.length > 0 ? `/projects/${projects[0].id}` : "/";
-
 export default function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -88,14 +84,14 @@ export default function LoginForm() {
     setActiveProvider("email");
     const user = await signInWithEmail(email, password);
     setActiveProvider(null);
-    if (user) navigate(firstProjectPath);
+    if (user) navigate("/");
   }
 
   async function handleGoogleLogin() {
     setActiveProvider("google");
     const user = await signInWithGoogle();
     setActiveProvider(null);
-    if (user) navigate(firstProjectPath);
+    if (user) navigate("/");
   }
 
   return (
