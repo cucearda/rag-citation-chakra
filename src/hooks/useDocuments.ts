@@ -44,8 +44,13 @@ export function useDocuments(projectId: string) {
   }
 
   async function remove(documentId: string): Promise<void> {
-    await deleteDocument(projectId, documentId)
-    setDocuments((prev) => prev.filter((d) => d.id !== documentId))
+    try {
+      setError(null)
+      await deleteDocument(projectId, documentId)
+      setDocuments((prev) => prev.filter((d) => d.id !== documentId))
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to delete document")
+    }
   }
 
   return { documents, loading, uploading, error, upload, remove, refetch: fetchDocuments }
