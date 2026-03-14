@@ -7,7 +7,11 @@ export default function Navbar() {
   const navigate = useNavigate()
 
   async function handleLogout() {
-    await signOut()
+    try {
+      await signOut()
+    } catch {
+      // sign-out failed, redirect anyway
+    }
     navigate("/login")
   }
 
@@ -19,7 +23,7 @@ export default function Navbar() {
       <HStack gap="10px">
         {currentUser ? (
           <>
-            <Text fontWeight="medium" fontSize="sm">{currentUser.email}</Text>
+            <Text fontWeight="medium" fontSize="sm">{currentUser.email ?? currentUser.displayName ?? "User"}</Text>
             <Button variant="plain" fontWeight="bold" onClick={handleLogout}>Logout</Button>
           </>
         ) : (
