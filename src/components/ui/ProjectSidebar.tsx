@@ -1,27 +1,26 @@
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import {
-  Box, VStack, Text, IconButton, Button, Input, HStack, Dialog, Portal, CloseButton,
+  Box, VStack, Text, IconButton, Button, Input, HStack, Dialog, Portal, CloseButton, Spinner,
 } from "@chakra-ui/react"
 import {
-  LuChevronLeft, LuChevronRight, LuChevronDown, LuPlus, LuTrash2, LuFileText,
+  LuChevronLeft, LuChevronRight, LuChevronDown, LuPlus, LuTrash2, LuFileText, LuUpload,
 } from "react-icons/lu"
 import { useNavigate } from "react-router-dom"
-import type { Project } from "@/data/mockProjects"
 import { useProjectContext } from "@/context/ProjectContext"
+import { useDocuments } from "@/hooks/useDocuments"
+import type { ApiProject } from "@/types/api"
 
 const EXPANDED_WIDTH = "220px"
 const COLLAPSED_WIDTH = "48px"
 
 export default function ProjectSidebar() {
   const navigate = useNavigate()
-  const { projectId, projects, addProject, removeProject, allDocuments, removeDocument } = useProjectContext()
+  const { projectId, projects, projectsLoading, createProject, removeProject } = useProjectContext()
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [creating, setCreating] = useState(false)
   const [newName, setNewName] = useState("")
-  const [deleteTarget, setDeleteTarget] = useState<Project | null>(null)
-  const [expandedProjects, setExpandedProjects] = useState<Set<string>>(
-    new Set([projectId])
-  )
+  const [deleteTarget, setDeleteTarget] = useState<ApiProject | null>(null)
+  const [expandedProjects, setExpandedProjects] = useState<Set<string>>(new Set([projectId]))
 
   useEffect(() => {
     setExpandedProjects((prev) => new Set([...prev, projectId]))
@@ -37,22 +36,14 @@ export default function ProjectSidebar() {
 
   async function handleCreate() {
     if (!newName.trim()) return
-    const res = await fetch("/api/projects", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: newName.trim() }),
-    }).catch(() => null)
-    const id = res?.ok ? (await res.json()).id : `proj-${Date.now()}`
-    const created: Project = { id, name: newName.trim() }
-    addProject(created)
+    const project = await createProject(newName.trim())
     setNewName("")
     setCreating(false)
-    navigate(`/projects/${id}`)
+    navigate(`/projects/${project.id}`)
   }
 
-  async function handleDelete(project: Project) {
-    await fetch(`/api/projects/${project.id}`, { method: "DELETE" }).catch(() => null)
-    removeProject(project.id)
+  async function handleDelete(project: ApiProject) {
+    await removeProject(project.id)
     setDeleteTarget(null)
     if (projectId === project.id) {
       const remaining = projects.filter((p) => p.id !== project.id)
@@ -65,25 +56,19 @@ export default function ProjectSidebar() {
       <Box
         w={sidebarOpen ? EXPANDED_WIDTH : COLLAPSED_WIDTH}
         minW={sidebarOpen ? EXPANDED_WIDTH : COLLAPSED_WIDTH}
-        borderRight="1px solid"
-        borderColor="borderDefault"
-        display="flex"
-        flexDirection="column"
+        borderRight="1px solid" borderColor="borderDefault"
+        display="flex" flexDirection="column"
         transition="width 0.2s, min-width 0.2s"
-        overflow="hidden"
-        bg="sidebar"
+        overflow="hidden" bg="sidebar"
       >
         {/* Header */}
         <HStack
           px="2" py="3"
           justifyContent={sidebarOpen ? "space-between" : "center"}
-          borderBottom="1px solid"
-          borderColor="borderDefault"
+          borderBottom="1px solid" borderColor="borderDefault"
         >
           {sidebarOpen && (
-            <Text fontWeight="semibold" fontSize="sm" ml="1" color="fg">
-              Projects
-            </Text>
+            <Text fontWeight="semibold" fontSize="sm" ml="1" color="fg">Projects</Text>
           )}
           <IconButton
             aria-label={sidebarOpen ? "Collapse sidebar" : "Expand sidebar"}
@@ -130,16 +115,19 @@ export default function ProjectSidebar() {
 
         {/* Project list */}
         <VStack gap="0" align="stretch" flex="1" overflowY="auto" py="1">
+          {projectsLoading && (
+            <Box display="flex" justifyContent="center" py="4">
+              <Spinner size="sm" />
+            </Box>
+          )}
           {projects.map((project) => {
             const isActive = project.id === projectId
             const isFilesOpen = expandedProjects.has(project.id)
-            const projectDocs = allDocuments.filter((d) => d.projectId === project.id)
 
             return (
               <Box key={project.id}>
                 <HStack
-                  px="2" py="1.5"
-                  cursor="pointer"
+                  px="2" py="1.5" cursor="pointer"
                   bg={isActive ? "bg.subtle" : "transparent"}
                   borderRadius="md" mx="1" gap="1"
                   justifyContent={sidebarOpen ? "space-between" : "center"}
@@ -149,8 +137,7 @@ export default function ProjectSidebar() {
                   {sidebarOpen ? (
                     <>
                       <IconButton
-                        aria-label="Toggle files"
-                        variant="ghost" size="2xs"
+                        aria-label="Toggle files" variant="ghost" size="2xs"
                         onClick={(e) => { e.stopPropagation(); toggleProjectFiles(project.id) }}
                       >
                         {isFilesOpen ? <LuChevronDown /> : <LuChevronRight />}
@@ -159,8 +146,7 @@ export default function ProjectSidebar() {
                         {project.name}
                       </Text>
                       <IconButton
-                        aria-label="Delete project" variant="ghost" size="2xs"
-                        colorPalette="red"
+                        aria-label="Delete project" variant="ghost" size="2xs" colorPalette="red"
                         onClick={(e) => { e.stopPropagation(); setDeleteTarget(project) }}
                       >
                         <LuTrash2 />
@@ -171,20 +157,8 @@ export default function ProjectSidebar() {
                   )}
                 </HStack>
 
-                {/* File list under project — only shown for active project */}
                 {sidebarOpen && isFilesOpen && (
-                  <VStack gap="0" align="stretch" pl="6" pr="2" pb="1">
-                    {projectDocs.length === 0 && (
-                      <Text fontSize="xs" color="textSecondary" px="2" py="1">No files yet</Text>
-                    )}
-                    {projectDocs.map((doc) => (
-                      <FileRow
-                        key={doc.id}
-                        fileName={doc.fileName}
-                        onDelete={() => removeDocument(doc.id)}
-                      />
-                    ))}
-                  </VStack>
+                  <DocumentList projectId={project.id} />
                 )}
               </Box>
             )
@@ -222,22 +196,54 @@ export default function ProjectSidebar() {
   )
 }
 
-function FileRow({ fileName, onDelete }: { fileName: string; onDelete: () => void }) {
+function DocumentList({ projectId }: { projectId: string }) {
+  const { documents, loading, uploading, error, upload, remove } = useDocuments(projectId)
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (file) void upload(file)
+    e.target.value = ""
+  }
+
   return (
-    <HStack
-      px="2" py="1" borderRadius="md" gap="1.5"
-      _hover={{ bg: "bg.subtle" }}
-      role="group"
-    >
-      <LuFileText size={12} color="var(--chakra-colors-textSecondary)" />
-      <Text fontSize="xs" flex="1" truncate color="fg.muted">{fileName}</Text>
-      <IconButton
-        aria-label="Delete file" variant="ghost" size="2xs"
-        colorPalette="red"
-        onClick={onDelete}
+    <VStack gap="0" align="stretch" pl="6" pr="2" pb="1">
+      {loading && <Spinner size="xs" alignSelf="center" my="1" />}
+      {error && <Text fontSize="xs" color="red.500" px="2" py="1">{error}</Text>}
+      {!loading && documents.length === 0 && (
+        <Text fontSize="xs" color="textSecondary" px="2" py="1">No files yet</Text>
+      )}
+      {documents.map((doc) => (
+        <HStack
+          key={doc.id}
+          px="2" py="1" borderRadius="md" gap="1.5"
+          _hover={{ bg: "bg.subtle" }}
+          role="group"
+        >
+          <LuFileText size={12} color="var(--chakra-colors-textSecondary)" />
+          <Text fontSize="xs" flex="1" truncate color="fg.muted">{doc.filename}</Text>
+          <IconButton
+            aria-label="Delete file" variant="ghost" size="2xs" colorPalette="red"
+            onClick={() => void remove(doc.id)}
+          >
+            <LuTrash2 />
+          </IconButton>
+        </HStack>
+      ))}
+      <input
+        ref={inputRef}
+        type="file"
+        accept=".pdf"
+        style={{ display: "none" }}
+        onChange={handleFileChange}
+      />
+      <Button
+        size="xs" variant="ghost" justifyContent="flex-start"
+        loading={uploading}
+        onClick={() => inputRef.current?.click()}
       >
-        <LuTrash2 />
-      </IconButton>
-    </HStack>
+        <LuUpload /> Upload PDF
+      </Button>
+    </VStack>
   )
 }
