@@ -51,22 +51,26 @@ export default function ChatInputBar({ onSubmit, disabled, onUpload }: ChatInput
         gap="1"
         px="2" py="1.5"
       >
-        <input
-          ref={fileInputRef}
-          type="file"
-          multiple
-          accept=".pdf,.doc,.docx,.txt"
-          style={{ display: "none" }}
-          onChange={handleFileChange}
-        />
-        <IconButton
-          aria-label="Attach file"
-          variant="ghost" size="sm"
-          color="textSecondary"
-          onClick={() => fileInputRef.current?.click()}
-        >
-          <LuPaperclip />
-        </IconButton>
+        {onUpload && (
+          <>
+            <input
+              ref={fileInputRef}
+              type="file"
+              multiple
+              accept=".pdf,.doc,.docx,.txt"
+              style={{ display: "none" }}
+              onChange={handleFileChange}
+            />
+            <IconButton
+              aria-label="Attach file"
+              variant="ghost" size="sm"
+              color="textSecondary"
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <LuPaperclip />
+            </IconButton>
+          </>
+        )}
         <Textarea
           placeholder="Reply..."
           value={text}

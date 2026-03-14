@@ -23,14 +23,26 @@ export function useProjects() {
   useEffect(() => { void fetchProjects() }, [fetchProjects])
 
   async function create(name: string): Promise<ApiProject> {
-    const project = await createProject(name)
-    setProjects((prev) => [...prev, project])
-    return project
+    try {
+      setError(null)
+      const project = await createProject(name)
+      setProjects((prev) => [...prev, project])
+      return project
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to create project")
+      throw e  // re-throw so callers know it failed
+    }
   }
 
   async function remove(projectId: string): Promise<void> {
-    await deleteProject(projectId)
-    setProjects((prev) => prev.filter((p) => p.id !== projectId))
+    try {
+      setError(null)
+      await deleteProject(projectId)
+      setProjects((prev) => prev.filter((p) => p.id !== projectId))
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Failed to delete project")
+      throw e  // re-throw so caller can avoid navigation
+    }
   }
 
   return { projects, loading, error, create, remove, refetch: fetchProjects }

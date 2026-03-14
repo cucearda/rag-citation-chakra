@@ -15,7 +15,7 @@ const COLLAPSED_WIDTH = "48px"
 
 export default function ProjectSidebar() {
   const navigate = useNavigate()
-  const { projectId, projects, projectsLoading, createProject, removeProject } = useProjectContext()
+  const { projectId, projects, projectsLoading, projectsError, createProject, removeProject } = useProjectContext()
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [creating, setCreating] = useState(false)
   const [newName, setNewName] = useState("")
@@ -43,11 +43,16 @@ export default function ProjectSidebar() {
   }
 
   async function handleDelete(project: ApiProject) {
-    await removeProject(project.id)
-    setDeleteTarget(null)
-    if (projectId === project.id) {
-      const remaining = projects.filter((p) => p.id !== project.id)
-      navigate(remaining.length > 0 ? `/projects/${remaining[0].id}` : "/")
+    try {
+      await removeProject(project.id)
+      setDeleteTarget(null)
+      if (projectId === project.id) {
+        const remaining = projects.filter((p) => p.id !== project.id)
+        navigate(remaining.length > 0 ? `/projects/${remaining[0].id}` : "/")
+      }
+    } catch {
+      // error is shown via projectsError in the sidebar
+      setDeleteTarget(null)
     }
   }
 
@@ -119,6 +124,9 @@ export default function ProjectSidebar() {
             <Box display="flex" justifyContent="center" py="4">
               <Spinner size="sm" />
             </Box>
+          )}
+          {projectsError && (
+            <Text fontSize="xs" color="red.500" px="3" py="2">{projectsError}</Text>
           )}
           {projects.map((project) => {
             const isActive = project.id === projectId

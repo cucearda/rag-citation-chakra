@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useCallback } from "react"
 import { getCitations } from "@/services/citationService"
 import type { ApiCitationResponse } from "@/types/api"
 
@@ -6,7 +6,7 @@ export function useCitations(projectId: string) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  async function fetchCitations(paragraph: string): Promise<ApiCitationResponse | null> {
+  const fetchCitations = useCallback(async (paragraph: string): Promise<ApiCitationResponse | null> => {
     try {
       setLoading(true)
       setError(null)
@@ -17,7 +17,7 @@ export function useCitations(projectId: string) {
     } finally {
       setLoading(false)
     }
-  }
+  }, [projectId])
 
   return { fetchCitations, loading, error }
 }
