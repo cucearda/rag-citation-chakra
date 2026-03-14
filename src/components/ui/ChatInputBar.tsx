@@ -1,16 +1,19 @@
 import { useRef, useState } from "react"
 import { Box, Textarea, IconButton } from "@chakra-ui/react"
 import { LuPaperclip, LuArrowUp } from "react-icons/lu"
-import { useProjectContext } from "@/context/ProjectContext"
+import { useParams } from "react-router-dom"
+import { useDocuments } from "@/hooks/useDocuments"
 
 interface ChatInputBarProps {
   onSubmit: (text: string) => void
+  disabled?: boolean
 }
 
-export default function ChatInputBar({ onSubmit }: ChatInputBarProps) {
+export default function ChatInputBar({ onSubmit, disabled }: ChatInputBarProps) {
   const [text, setText] = useState("")
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const { addDocument } = useProjectContext()
+  const { projectId = "" } = useParams<{ projectId: string }>()
+  const { upload } = useDocuments(projectId)
 
   function handleSubmit() {
     const trimmed = text.trim()
@@ -28,7 +31,7 @@ export default function ChatInputBar({ onSubmit }: ChatInputBarProps) {
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files ?? [])
-    files.forEach((f) => addDocument(f.name))
+    files.forEach((f) => void upload(f))
     e.target.value = ""
   }
 
@@ -85,9 +88,9 @@ export default function ChatInputBar({ onSubmit }: ChatInputBarProps) {
           aria-label="Send"
           size="sm"
           borderRadius="full"
-          disabled={!text.trim()}
-          colorPalette={text.trim() ? "orange" : "gray"}
-          variant={text.trim() ? "solid" : "ghost"}
+          disabled={disabled || !text.trim()}
+          colorPalette={text.trim() && !disabled ? "orange" : "gray"}
+          variant={text.trim() && !disabled ? "solid" : "ghost"}
           onClick={handleSubmit}
         >
           <LuArrowUp />
