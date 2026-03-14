@@ -6,19 +6,25 @@ import LoginLayout from './layouts/login-layout'
 import SignupLayout from './layouts/signup-layout'
 import ConversationView from './components/ui/ConversationView'
 import { AuthProvider } from './context/AuthContext'
+import ProtectedRoute from './components/ui/ProtectedRoute'
 
 const router = createBrowserRouter([
   { path: '/login', element: <LoginLayout /> },
   { path: '/signup', element: <SignupLayout /> },
   {
     path: '/',
-    element: <RootLayout />,
+    element: <ProtectedRoute />,
     children: [
-      { index: true, element: null },
       {
-        path: 'projects/:projectId',
-        element: <ProjectLayout />,
-        children: [{ index: true, element: <ConversationView /> }],
+        element: <RootLayout />,
+        children: [
+          { index: true, element: null },
+          {
+            path: 'projects/:projectId',
+            element: <ProjectLayout />,
+            children: [{ index: true, element: <ConversationView /> }],
+          },
+        ],
       },
     ],
   },
