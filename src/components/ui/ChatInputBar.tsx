@@ -1,19 +1,16 @@
 import { useRef, useState } from "react"
 import { Box, Textarea, IconButton } from "@chakra-ui/react"
 import { LuPaperclip, LuArrowUp } from "react-icons/lu"
-import { useParams } from "react-router-dom"
-import { useDocuments } from "@/hooks/useDocuments"
 
 interface ChatInputBarProps {
   onSubmit: (text: string) => void
   disabled?: boolean
+  onUpload?: (file: File) => void
 }
 
-export default function ChatInputBar({ onSubmit, disabled }: ChatInputBarProps) {
+export default function ChatInputBar({ onSubmit, disabled, onUpload }: ChatInputBarProps) {
   const [text, setText] = useState("")
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const { projectId = "" } = useParams<{ projectId: string }>()
-  const { upload } = useDocuments(projectId)
 
   function handleSubmit() {
     const trimmed = text.trim()
@@ -31,7 +28,9 @@ export default function ChatInputBar({ onSubmit, disabled }: ChatInputBarProps) 
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files ?? [])
-    files.forEach((f) => void upload(f))
+    if (onUpload) {
+      files.forEach((f) => onUpload(f))
+    }
     e.target.value = ""
   }
 
