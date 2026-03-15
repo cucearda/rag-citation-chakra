@@ -39,16 +39,16 @@ export default function ProjectSidebar() {
     const project = await createProject(newName.trim())
     setNewName("")
     setCreating(false)
-    navigate(`/projects/${project.id}`)
+    navigate(`/projects/${project.name}`)
   }
 
   async function handleDelete(project: ApiProject) {
     try {
-      await removeProject(project.id)
+      await removeProject(project.name)
       setDeleteTarget(null)
-      if (projectId === project.id) {
-        const remaining = projects.filter((p) => p.id !== project.id)
-        navigate(remaining.length > 0 ? `/projects/${remaining[0].id}` : "/")
+      if (projectId === project.name) {
+        const remaining = projects.filter((p) => p.name !== project.name)
+        navigate(remaining.length > 0 ? `/projects/${remaining[0].name}` : "/")
       }
     } catch {
       // error is shown via projectsError in the sidebar
