@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState } from "react"
-import { Box, Text, VStack } from "@chakra-ui/react"
+import { Box, Text, VStack, Spinner, HStack } from "@chakra-ui/react"
 import { useParams } from "react-router-dom"
 import type { ApiCitation } from "@/types/api"
 import { useProjectContext } from "@/context/ProjectContext"
@@ -110,6 +110,12 @@ export default function ConversationView() {
                 )}
               </Box>
             ))}
+            {loading && (
+              <HStack gap="2" px="1">
+                <Spinner size="xs" color="textSecondary" />
+                <Text fontSize="sm" color="textSecondary">Thinking...</Text>
+              </HStack>
+            )}
             <div ref={bottomRef} />
           </VStack>
         )}
