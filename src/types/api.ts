@@ -20,7 +20,7 @@ export interface ApiUploadedDocument {
   chunks_indexed: number
 }
 
-export interface ApiCitationSource {
+export interface CitationSource {
   paper_title: string
   authors: string
   year: string
@@ -36,10 +36,10 @@ export interface Citation {
   reason: string
   relevant_quote: string
   relevance_explanation: string
-  source: ApiCitationSource
+  source: CitationSource
 }
 
-export interface ApiCitationResponse {
+export interface CitationResponse {
   cited_paragraph: string
   citations: Citation[]
 }
