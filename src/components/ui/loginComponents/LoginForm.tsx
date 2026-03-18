@@ -84,14 +84,14 @@ export default function LoginForm() {
     setActiveProvider("email");
     const user = await signInWithEmail(email, password);
     setActiveProvider(null);
-    if (user) navigate("/");
+    if (user) navigate("/projects");
   }
 
   async function handleGoogleLogin() {
     setActiveProvider("google");
     const user = await signInWithGoogle();
     setActiveProvider(null);
-    if (user) navigate("/");
+    if (user) navigate("/projects");
   }
 
   return (
