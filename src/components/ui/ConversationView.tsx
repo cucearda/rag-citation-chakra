@@ -1,4 +1,4 @@
-import { useRef, useEffect } from "react"
+import { useRef, useEffect, useState } from "react"
 import { Box, Text, VStack, Spinner, HStack } from "@chakra-ui/react"
 import { useParams } from "react-router-dom"
 import { useProjectContext } from "@/context/ProjectContext"
@@ -16,6 +16,7 @@ export default function ConversationView() {
   const { fetchCitations, loading: citationLoading } = useCitations(projectId)
   const { messages, addMessage, loading: historyLoading } = useChatHistory(userId, projectId)
   const bottomRef = useRef<HTMLDivElement>(null)
+  const [submitting, setSubmitting] = useState(false)
 
   const project = projects.find((p) => p.id === projectId)
 
@@ -24,20 +25,29 @@ export default function ConversationView() {
   }, [messages])
 
   async function handleSubmit(text: string) {
-    const userMsg: UserMessage = { role: "user", content: text }
-    await addMessage(userMsg)
+    if (!userId) return
+    setSubmitting(true)
+    try {
+      const userMsg: UserMessage = { role: "user", content: text }
+      await addMessage(userMsg)
 
-    const result = await fetchCitations(text)
-    if (result) {
-      const aiMsg: AiMessage = {
-        role: "ai",
-        content: result.cited_paragraph,
-        citations: result.citations,
+      const result = await fetchCitations(text)
+      if (result) {
+        const aiMsg: AiMessage = {
+          role: "ai",
+          content: result.cited_paragraph,
+          citations: result.citations,
+        }
+        await addMessage(aiMsg)
+      } else {
+        const errMsg: ErrorMessage = { role: "error", content: "Failed to get citations. Please try again." }
+        await addMessage(errMsg)
       }
-      await addMessage(aiMsg)
-    } else {
-      const errMsg: ErrorMessage = { role: "error", content: "Failed to get citations. Please try again." }
-      await addMessage(errMsg)
+    } catch {
+      const errMsg: ErrorMessage = { role: "error", content: "Something went wrong. Please try again." }
+      await addMessage(errMsg).catch(() => {})
+    } finally {
+      setSubmitting(false)
     }
   }
 
@@ -67,7 +77,7 @@ export default function ConversationView() {
         ) : (
           <VStack gap="6" align="stretch" maxW="760px" mx="auto">
             {messages.map((msg, i) => (
-              <Box key={i}>
+              <Box key={msg.role + i}>
                 {msg.role === "user" && (
                   <Box display="flex" justifyContent="flex-end">
                     <Box
@@ -110,7 +120,7 @@ export default function ConversationView() {
           </VStack>
         )}
       </Box>
-      <ChatInputBar onSubmit={handleSubmit} disabled={citationLoading} />
+      <ChatInputBar onSubmit={handleSubmit} disabled={citationLoading || submitting} />
     </Box>
   )
 }
