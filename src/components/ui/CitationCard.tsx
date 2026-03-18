@@ -1,9 +1,9 @@
 import { Box, Text, HStack } from "@chakra-ui/react"
 import { LuFileText } from "react-icons/lu"
-import type { ApiCitation } from "@/types/api"
+import type { Citation } from "@/types/api"
 
 interface CitationCardProps {
-  citation: ApiCitation
+  citation: Citation
 }
 
 export default function CitationCard({ citation }: CitationCardProps) {

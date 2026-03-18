@@ -1,7 +1,7 @@
 import { useRef, useEffect, useState } from "react"
 import { Box, Text, VStack, Spinner, HStack } from "@chakra-ui/react"
 import { useParams } from "react-router-dom"
-import type { ApiCitation } from "@/types/api"
+import type { Citation } from "@/types/api"
 import { useProjectContext } from "@/context/ProjectContext"
 import { useCitations } from "@/hooks/useCitations"
 import CitationCard from "./CitationCard"
@@ -15,7 +15,7 @@ interface UserMessage {
 interface AiMessage {
   role: "ai"
   content: string
-  citations: ApiCitation[]
+  citations: Citation[]
 }
 
 interface ErrorMessage {

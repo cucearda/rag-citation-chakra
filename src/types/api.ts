@@ -29,7 +29,7 @@ export interface ApiCitationSource {
   pages: string | null
 }
 
-export interface ApiCitation {
+export interface Citation {
   start: number
   end: number
   citation_format: string
@@ -41,5 +41,5 @@ export interface ApiCitation {
 
 export interface ApiCitationResponse {
   cited_paragraph: string
-  citations: ApiCitation[]
+  citations: Citation[]
 }
