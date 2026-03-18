@@ -73,37 +73,34 @@ export function useChatHistory(userId: string, projectId: string) {
 
   const addMessage = useCallback(
     async (msg: Message) => {
-      // Error messages: local-only, not persisted
       if (msg.role === "error") {
         setMessages((prev) => [...prev, msg])
         return
       }
 
-      // Optimistic local update
-      setMessages((prev) => [...prev, msg])
+      setMessages((prev) => {
+        const updated = [...prev, msg]
+        const persisted = updated.filter((m): m is PersistedMessage => m.role !== "error")
+        saveToLocalStorage(userId, projectId, persisted)
+        return updated
+      })
 
       const messagesRef = collection(db, "users", userId, "projects", projectId, "messages")
 
-      // Compute index = number of persisted messages before this one
-      setMessages((prev) => {
-        const persisted = prev.filter((m): m is PersistedMessage => m.role !== "error")
-        const index = persisted.length - 1
+      // Compute index by reading from the localStorage we just wrote
+      const persisted = loadFromLocalStorage(userId, projectId)
+      const index = persisted.length - 1
 
-        const doc: Record<string, unknown> = {
-          index,
-          type: msg.role,
-          content: msg.content,
-        }
-        if (msg.role === "ai") {
-          doc.citations = (msg as AiMessage).citations
-        }
+      const doc: Record<string, unknown> = {
+        index,
+        type: msg.role,
+        content: msg.content,
+      }
+      if (msg.role === "ai") {
+        doc.citations = (msg as AiMessage).citations
+      }
 
-        void addDoc(messagesRef, doc).then(() => {
-          saveToLocalStorage(userId, projectId, persisted)
-        })
-
-        return prev
-      })
+      void addDoc(messagesRef, doc)
     },
     [userId, projectId],
   )
