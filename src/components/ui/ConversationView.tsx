@@ -1,35 +1,20 @@
-import { useRef, useEffect, useState } from "react"
+import { useRef, useEffect } from "react"
 import { Box, Text, VStack, Spinner, HStack } from "@chakra-ui/react"
 import { useParams } from "react-router-dom"
-import type { Citation } from "@/types/api"
 import { useProjectContext } from "@/context/ProjectContext"
+import { useAuthContext } from "@/context/AuthContext"
 import { useCitations } from "@/hooks/useCitations"
+import { useChatHistory, type UserMessage, type AiMessage, type ErrorMessage } from "@/hooks/useChatHistory"
 import CitationCard from "./CitationCard"
 import ChatInputBar from "./ChatInputBar"
-
-interface UserMessage {
-  role: "user"
-  content: string
-}
-
-interface AiMessage {
-  role: "ai"
-  content: string
-  citations: Citation[]
-}
-
-interface ErrorMessage {
-  role: "error"
-  content: string
-}
-
-type Message = UserMessage | AiMessage | ErrorMessage
 
 export default function ConversationView() {
   const { projectId = "" } = useParams<{ projectId: string }>()
   const { projects } = useProjectContext()
-  const { fetchCitations, loading } = useCitations(projectId)
-  const [messages, setMessages] = useState<Message[]>([])
+  const { currentUser } = useAuthContext()
+  const userId = currentUser?.uid
+  const { fetchCitations, loading: citationLoading } = useCitations(projectId)
+  const { messages, addMessage, loading: historyLoading } = useChatHistory(userId, projectId)
   const bottomRef = useRef<HTMLDivElement>(null)
 
   const project = projects.find((p) => p.id === projectId)
@@ -40,7 +25,7 @@ export default function ConversationView() {
 
   async function handleSubmit(text: string) {
     const userMsg: UserMessage = { role: "user", content: text }
-    setMessages((prev) => [...prev, userMsg])
+    await addMessage(userMsg)
 
     const result = await fetchCitations(text)
     if (result) {
@@ -49,14 +34,19 @@ export default function ConversationView() {
         content: result.cited_paragraph,
         citations: result.citations,
       }
-      setMessages((prev) => [...prev, aiMsg])
+      await addMessage(aiMsg)
     } else {
-      const errMsg: ErrorMessage = {
-        role: "error",
-        content: "Failed to get citations. Please try again.",
-      }
-      setMessages((prev) => [...prev, errMsg])
+      const errMsg: ErrorMessage = { role: "error", content: "Failed to get citations. Please try again." }
+      await addMessage(errMsg)
     }
+  }
+
+  if (historyLoading) {
+    return (
+      <Box display="flex" flex="1" alignItems="center" justifyContent="center" bg="canvas">
+        <Spinner size="md" color="textSecondary" />
+      </Box>
+    )
   }
 
   return (
@@ -110,7 +100,7 @@ export default function ConversationView() {
                 )}
               </Box>
             ))}
-            {loading && (
+            {citationLoading && (
               <HStack gap="2" px="1">
                 <Spinner size="xs" color="textSecondary" />
                 <Text fontSize="sm" color="textSecondary">Thinking...</Text>
@@ -120,7 +110,7 @@ export default function ConversationView() {
           </VStack>
         )}
       </Box>
-      <ChatInputBar onSubmit={handleSubmit} disabled={loading} />
+      <ChatInputBar onSubmit={handleSubmit} disabled={citationLoading} />
     </Box>
   )
 }
