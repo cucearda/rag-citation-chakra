@@ -61,7 +61,7 @@ export default function ConversationView() {
 
   return (
     <Box display="flex" flexDirection="column" flex="1" minH="0" bg="canvas">
-      <Box flex="1" overflowY="auto" px="6" py="4">
+      <Box flex="1" overflowY="auto" px="6" py="2">
         {messages.length === 0 ? (
           <Box
             display="flex" flexDirection="column" alignItems="center"
@@ -75,7 +75,7 @@ export default function ConversationView() {
             </Text>
           </Box>
         ) : (
-          <VStack gap="6" align="stretch" maxW="760px" mx="auto">
+          <VStack gap="6" align="stretch" maxW="90%" mx="auto">
             {messages.map((msg, i) => (
               <Box key={msg.role + i}>
                 {msg.role === "user" && (
